@@ -131,7 +131,7 @@ Outputs:
     Description: VPC ID
     Value: !Ref VPC
     Export:
-      Name: !Sub "${AWS::StackName}-VPCID"
+      Name: "VPCID-proyecto"
    AZ1NAME:
     Description: PUBLIC AND PRIVATE SUBNET 1 AVAILABILITY ZONE
     Value: !Select [ 0, !GetAZs { Ref: "AWS::Region" } ]

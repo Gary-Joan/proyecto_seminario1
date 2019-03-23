@@ -1,0 +1,33 @@
+AWSTemplateFormatVersion: 2010-09-09
+Resources:
+ SGBase:
+  Type: AWS::EC2::SecurityGroup
+  Properties:
+    GroupDescription: CREATE RULES POR INBOUND AND OUTBOUND
+    VpcId: !ImportValue VPCID-proyecto
+    GroupName: SGPROYECTO
+    Tags:
+      - Key: Name
+        Value: SECURITY
+    SecurityGroupIngress:
+    - IpProtocol: tcp
+      FromPort: 80
+      ToPort: 80
+      CidrIp: 0.0.0.0/0
+    - IpProtocol: tcp
+      FromPort: 22
+      ToPort: 22
+      CidrIp: 0.0.0.0/0
+    SecurityGroupEgress:
+    - IpProtocol: tcp
+      FromPort: 0
+      ToPort: 65535
+      CidrIp: 0.0.0.0/0
+      
+Outputs:
+   SGID:
+    Description: ID OF THE SECURITY GROUP
+    Value: !Ref SGBase
+    Export:
+      Name: "SG-PROYECTO"
+   
