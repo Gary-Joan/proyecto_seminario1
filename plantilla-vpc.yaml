@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-
+Description: Creates THE VPC WITH 2 AVAILABILITY ZONES 1 PUBLIC AND 1 PRIVATE
 Parameters:
   CidrBlock:
     Description: Please enter the IP range (CIDR notation) for this VPC

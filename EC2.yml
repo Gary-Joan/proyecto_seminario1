@@ -1,0 +1,115 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Creates an Amazon Linux Web Server 
+
+Mappings:
+  RegionMap:
+    us-east-1:
+      AMI: ami-4fffc834
+    us-east-2:
+      AMI: ami-ea87a78f
+
+Resources:
+  EC2Instance:
+    Type: AWS::EC2::Instance
+    Metadata:
+      AWS::CloudFormation::Init:
+        config:
+          packages:
+            yum:
+              httpd: []
+          files:
+            "/var/www/html/index.html":
+              content: |
+               <html>
+                 <body>
+                   <h1>WEB SERVER 1 </h1>
+                   <p>Hello World!</p>
+                 </body>
+                </html>
+              mode: '000644'
+              owner: root
+              group: root
+          services:
+            sysvinit:
+              httpd:
+                enabled: 'true'
+                ensureRunning: 'true'
+
+    Properties:
+      ImageId: !FindInMap [RegionMap, !Ref 'AWS::Region', 'AMI']
+      InstanceType: t2.micro
+      NetworkInterfaces: 
+        - AssociatePublicIpAddress: "true"
+          DeviceIndex: "0"
+          GroupSet:
+            - !ImportValue SG-PROYECTO
+          SubnetId: subnet-0ce99e95b5e5b9358
+      Tags:
+      - Key: Name
+        Value: Web Server 1
+      UserData:
+        'Fn::Base64': !Sub |
+          #!/bin/bash -ex
+           yum update -y aws-cfn-bootstrap
+          /opt/aws/bin/cfn-init -v -s ${AWS::StackName} -r EC2Instance --region ${AWS::Region}
+
+          
+          
+  EC2Instance2:
+    Type: AWS::EC2::Instance
+    Metadata:
+      AWS::CloudFormation::Init:
+        config:
+          packages:
+            yum:
+              httpd: []
+          files:
+            "/var/www/html/index.html":
+              content: |
+               <html>
+                 <body>
+                   <h1>WEB SERVER 1 </h1>
+                   <p>Hello World!</p>
+                 </body>
+                </html>
+              mode: '000644'
+              owner: root
+              group: root
+          services:
+            sysvinit:
+              httpd:
+                enabled: 'true'
+                ensureRunning: 'true'
+
+    Properties:
+      ImageId: !FindInMap [RegionMap, !Ref 'AWS::Region', 'AMI']
+      InstanceType: t2.micro
+      NetworkInterfaces: 
+        - AssociatePublicIpAddress: "true"
+          DeviceIndex: "0"
+          GroupSet:
+            - !ImportValue SG-PROYECTO
+          SubnetId: subnet-0bf315e7c1d597b8d
+      Tags:
+      - Key: Name
+        Value: Web Server 2
+      UserData:
+        'Fn::Base64': !Sub |
+          #!/bin/bash -ex
+           yum update -y aws-cfn-bootstrap
+          /opt/aws/bin/cfn-init -v -s ${AWS::StackName} -r EC2Instance --region ${AWS::Region}          
+
+Outputs:
+  HelloWorldURL:
+    Description: The url pointing to our page 1.
+    Value: !Sub 'http://${EC2Instance.PublicIp}'
+  PublicDNS:
+    Description: The Public DNS 1
+    Value: !Sub '${EC2Instance.PublicDnsName}'
+    
+  HelloWorldURL2:
+    Description: The url pointing to our page 2.
+    Value: !Sub 'http://${EC2Instance2.PublicIp}'
+  PublicDNS2:
+    Description: The Public DNS 2
+    Value: !Sub '${EC2Instance2.PublicDnsName}'
