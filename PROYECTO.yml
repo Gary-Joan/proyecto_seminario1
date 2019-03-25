@@ -1,0 +1,398 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Template to create a vpc with 2 subnet in different availability zone, 1 PUBLIC and 1 RPIVATE SUBNET AND 2 Web SERVER with a load balancer in it.
+Parameters:
+  CidrBlock:
+    Description: Please enter the IP range (CIDR notation) for this VPC
+    Type: String
+    Default: 192.168.0.0/16
+    
+    
+
+
+
+
+Mappings:
+  RegionMap:
+    us-east-1:
+      AMI: ami-4fffc834
+    us-east-2:
+      AMI: ami-ea87a78f
+  SecurityCertArnEnv:
+    dev: 
+      arn: arn:aws:acm:us-west-2:0123456789:certificate/abcd-0123-ab12-123c-abcd1234567890
+    qa:
+      arn: arn:aws:acm:us-west-2:0123456789:certificate/abcd-0123-ab12-123c-abcd1234567890
+    stage:
+      arn: arn:aws:acm:us-west-2:0123456789:certificate/abcd-0123-ab12-123c-abcd1234567890
+    prod:
+      arn: arn:aws:acm:us-west-2:0123456789:certificate/abcd-0123-ab12-123c-abcd1234567890    
+    
+Resources:
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 
+        Ref: CidrBlock
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-proyecto
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-IGW
+  InternetGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: 
+        Ref: InternetGateway
+      VpcId: 
+        Ref: VPC
+  PublicSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [ 0, !GetAZs { Ref: "AWS::Region" } ]
+      CidrBlock: !Select [0, !Cidr [!Ref CidrBlock, 4, 8]]
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-publica1
+          
+  PrivateSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [ 0, !GetAZs { Ref: "AWS::Region" } ]
+      CidrBlock: !Select [1, !Cidr [!Ref CidrBlock, 4, 8]]
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-privada1
+
+  PublicSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [ 1, !GetAZs { Ref: "AWS::Region" } ]
+      CidrBlock: !Select [2, !Cidr [!Ref CidrBlock, 4, 8]]
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-publica2
+          
+  PrivateSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [ 1, !GetAZs { Ref: "AWS::Region" } ]
+      CidrBlock: !Select [3, !Cidr [!Ref CidrBlock, 4, 8]]
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-privada2       
+  NatGateway1EIP:
+    Type: AWS::EC2::EIP
+    DependsOn: InternetGatewayAttachment
+    Properties:
+      Domain: VPC
+
+  NatGateway2EIP:
+    Type: AWS::EC2::EIP
+    DependsOn: InternetGatewayAttachment
+    Properties:
+      Domain: VPC
+
+  NatGateway1:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NatGateway1EIP.AllocationId
+      SubnetId: !Ref PublicSubnet1
+
+  NatGateway2:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NatGateway2EIP.AllocationId
+      SubnetId: !Ref PublicSubnet2 
+  
+      
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-rutas-publicas
+
+  DefaultPublicRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  PublicSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicSubnet1
+      
+  PublicSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicSubnet2
+      
+  PrivateRouteTable1:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-ruta-privada1
+
+  PrivateRouteTable2:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-ruta-privada2
+
+  PrivateSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable1
+      SubnetId: !Ref PrivateSubnet1
+
+  PrivateSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable2
+      SubnetId: !Ref PrivateSubnet2
+  DefaultPrivateRoute1:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable1
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGateway1
+
+  DefaultPrivateRoute2:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable2
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGateway2  
+
+  SGBase:
+   Type: AWS::EC2::SecurityGroup
+   Properties:
+    GroupDescription: CREATE RULES POR INBOUND AND OUTBOUND
+    VpcId: !Ref VPC
+    GroupName: SGPROYECTO
+    Tags:
+      - Key: Name
+        Value: SECURITY
+    SecurityGroupIngress:
+    - IpProtocol: -1
+      CidrIp: 0.0.0.0/0
+    
+    SecurityGroupEgress:
+    - IpProtocol: -1
+      CidrIp: 0.0.0.0/0
+      
+      
+      
+  EC2Instance:
+    Type: AWS::EC2::Instance
+    Metadata:
+      AWS::CloudFormation::Init:
+        config:
+          packages:
+            yum:
+              httpd: []
+          files:
+            "/var/www/html/index.html":
+              content: |
+               <html>
+                 <body>
+                   <h1>WEB SERVER 1 </h1>
+                   <p>Hello World!</p>
+                 </body>
+                </html>
+              mode: '000644'
+              owner: root
+              group: root
+          services:
+            sysvinit:
+              httpd:
+                enabled: 'true'
+                ensureRunning: 'true'
+
+    Properties:
+      ImageId: !FindInMap [RegionMap, !Ref 'AWS::Region', 'AMI']
+      InstanceType: t2.micro
+      KeyName: linux
+      NetworkInterfaces: 
+        - AssociatePublicIpAddress: "false"
+          DeviceIndex: "0"
+          GroupSet:
+            - !Ref SGBase
+          SubnetId: !Ref PrivateSubnet1
+      Tags:
+      - Key: Name
+        Value: Web Server 1
+      UserData:
+        'Fn::Base64': !Sub |
+          #!/bin/bash -ex
+           yum update -y aws-cfn-bootstrap
+          /opt/aws/bin/cfn-init -v -s ${AWS::StackName} -r EC2Instance --region ${AWS::Region}
+    DependsOn: NatGateway1
+          
+          
+  EC2Instance2:
+    Type: AWS::EC2::Instance
+    Metadata:
+      AWS::CloudFormation::Init:
+        config:
+          packages:
+            yum:
+              httpd: []
+          files:
+            "/var/www/html/index.html":
+              content: |
+               <html>
+                 <body>
+                   <h1>WEB SERVER 2 </h1>
+                   <p>Hello World!</p>
+                 </body>
+                </html>
+              mode: '000644'
+              owner: root
+              group: root
+          services:
+            sysvinit:
+              httpd:
+                enabled: 'true'
+                ensureRunning: 'true'
+
+    Properties:
+      ImageId: !FindInMap [RegionMap, !Ref 'AWS::Region', 'AMI']
+      InstanceType: t2.micro
+      KeyName: linux
+      NetworkInterfaces: 
+        - AssociatePublicIpAddress: "false"
+          DeviceIndex: "0"
+          GroupSet:
+            - !Ref SGBase
+          SubnetId: !Ref PrivateSubnet2
+      Tags:
+      - Key: Name
+        Value: Web Server 2
+      UserData:
+        'Fn::Base64': !Sub |
+          #!/bin/bash -ex
+           yum update -y aws-cfn-bootstrap
+          /opt/aws/bin/cfn-init -v -s ${AWS::StackName} -r EC2Instance2 --region ${AWS::Region}   
+    DependsOn: NatGateway2      
+
+  RedisLoadBalancer:
+      Type: AWS::ElasticLoadBalancing::LoadBalancer
+      Properties:
+          ConnectionDrainingPolicy:
+                Enabled: true
+                Timeout: 60
+          ConnectionSettings:
+                IdleTimeout: 60
+          CrossZone: true
+          Listeners:
+              - InstancePort: 80
+                InstanceProtocol: HTTP
+                LoadBalancerPort: 80
+                Protocol: HTTP
+          HealthCheck:
+            Target:
+              Fn::Join:
+              - ''
+              - - 'HTTP:80'
+                - "/index.html"
+            HealthyThreshold: '3'
+            UnhealthyThreshold: '5'
+            Interval: '30'
+            Timeout: '5'
+                  
+          LoadBalancerName: !Sub Proyecto-LB
+          Scheme: internet-facing
+          Subnets: 
+           - !Ref PublicSubnet1
+           - !Ref PublicSubnet2
+          Instances: 
+           - !Ref EC2Instance
+           - !Ref EC2Instance2
+          SecurityGroups: 
+              - !Ref SGBase
+          Tags: 
+              - Key: Name
+                Value: !Sub Proyecto-LB
+
+              - Key: Environment
+                Value: !Sub Proyecto-LB      
+Outputs:
+   VPCID:
+    Description: VPC ID
+    Value: !Ref VPC
+    Export:
+      Name: "VPCID-proyecto"
+   AZ1NAME:
+    Description: PUBLIC AND PRIVATE SUBNET 1 AVAILABILITY ZONE
+    Value: !Select [ 0, !GetAZs { Ref: "AWS::Region" } ]
+    Export:
+      Name: "AZ1" 
+   AZ2NAME:
+    Description: PUBLIC AND PRIVATE SUBNET 2 AVAILABILITY ZONE
+    Value: !Select [ 1, !GetAZs { Ref: "AWS::Region" } ]
+    Export:
+      Name: "AZ2" 
+   PUBLICSUBNET1:
+    Description: ID FOR THE PUBLIC SUBNET 1
+    Value: !Ref PublicSubnet1
+    Export:
+      Name: "PublicSubnet-1" 
+   PRIVATESUBNET1:
+    Description: ID FOR THE PRIVATE SUBNET 1
+    Value: !Ref PrivateSubnet1
+    Export:
+      Name: "PrivateSubnet-1"   
+   PUBLICSUBNET2:
+    Description: ID FOR THE PUBLIC SUBNET 2
+    Value: !Ref PublicSubnet2
+    Export:
+      Name: "PublicSubnet-2" 
+   PRIVATESUBNET2:
+    Description: ID FOR THE PRIVATE SUBNET 2
+    Value: !Ref PrivateSubnet2
+    Export:
+      Name: "PrivateSubnet-2"     
+   SGID:
+    Description: ID OF THE SECURITY GROUP
+    Value: !Ref SGBase
+    Export:
+      Name: "SG-PROYECTO"
+   EC2id1:
+    Description: ID OF THE Ec2 web 1 Instance
+    Value: !Ref EC2Instance
+    Export:
+      Name: "web1-ec2"
+   EC2id2:
+    Description: ID OF THE Ec2 web 2 Instance
+    Value: !Ref EC2Instance2
+    Export:
+      Name: "web2-ec2"         
+   RedisLoadBalancer:
+    Description: A reference to the Classic Redis Load Balancer
+    Value: !Ref RedisLoadBalancer
+
+   RedisLoadBalancerUrl:
+    Description: The URL of the Classic Redis Load Balancer
+    Value: !GetAtt RedisLoadBalancer.DNSName 

@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: >
-    This template deploys an LDP Classic Load Balancer. The intent is to distribute TCP socket connections for Mirth.
+    This template deploys an LDP Classic Load Balancer for the EC2 Instances withing the private subnet.
 
 Parameters:
 
