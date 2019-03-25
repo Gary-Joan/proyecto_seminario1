@@ -38,12 +38,13 @@ Resources:
     Properties:
       ImageId: !FindInMap [RegionMap, !Ref 'AWS::Region', 'AMI']
       InstanceType: t2.micro
+      KeyName: linux
       NetworkInterfaces: 
-        - AssociatePublicIpAddress: "true"
+        - AssociatePublicIpAddress: "false"
           DeviceIndex: "0"
           GroupSet:
             - !ImportValue SG-PROYECTO
-          SubnetId: subnet-0ce99e95b5e5b9358
+          SubnetId: !ImportValue PrivateSubnet-1
       Tags:
       - Key: Name
         Value: Web Server 1
@@ -68,7 +69,7 @@ Resources:
               content: |
                <html>
                  <body>
-                   <h1>WEB SERVER 1 </h1>
+                   <h1>WEB SERVER 2 </h1>
                    <p>Hello World!</p>
                  </body>
                 </html>
@@ -84,12 +85,13 @@ Resources:
     Properties:
       ImageId: !FindInMap [RegionMap, !Ref 'AWS::Region', 'AMI']
       InstanceType: t2.micro
+      KeyName: linux
       NetworkInterfaces: 
-        - AssociatePublicIpAddress: "true"
+        - AssociatePublicIpAddress: "false"
           DeviceIndex: "0"
           GroupSet:
             - !ImportValue SG-PROYECTO
-          SubnetId: subnet-0bf315e7c1d597b8d
+          SubnetId: !ImportValue PrivateSubnet-2
       Tags:
       - Key: Name
         Value: Web Server 2
@@ -97,19 +99,16 @@ Resources:
         'Fn::Base64': !Sub |
           #!/bin/bash -ex
            yum update -y aws-cfn-bootstrap
-          /opt/aws/bin/cfn-init -v -s ${AWS::StackName} -r EC2Instance --region ${AWS::Region}          
+          /opt/aws/bin/cfn-init -v -s ${AWS::StackName} -r EC2Instance2 --region ${AWS::Region}          
 
 Outputs:
-  HelloWorldURL:
-    Description: The url pointing to our page 1.
-    Value: !Sub 'http://${EC2Instance.PublicIp}'
-  PublicDNS:
-    Description: The Public DNS 1
-    Value: !Sub '${EC2Instance.PublicDnsName}'
-    
-  HelloWorldURL2:
-    Description: The url pointing to our page 2.
-    Value: !Sub 'http://${EC2Instance2.PublicIp}'
-  PublicDNS2:
-    Description: The Public DNS 2
-    Value: !Sub '${EC2Instance2.PublicDnsName}'
+   EC2id1:
+    Description: ID OF THE Ec2 web 1 Instance
+    Value: !Ref EC2Instance
+    Export:
+      Name: "web1-ec2"
+   EC2id2:
+    Description: ID OF THE Ec2 web 2 Instance
+    Value: !Ref EC2Instance2
+    Export:
+      Name: "web2-ec2"

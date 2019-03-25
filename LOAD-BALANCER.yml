@@ -1,0 +1,82 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+    This template deploys an LDP Classic Load Balancer. The intent is to distribute TCP socket connections for Mirth.
+
+Parameters:
+
+
+
+    VPC:
+        Type: AWS::EC2::VPC::Id
+        Description: Choose which VPC the Classic Load Balancer should be deployed to
+        
+
+
+        
+Mappings:
+
+    SecurityCertArnEnv:
+      dev: 
+        arn: arn:aws:acm:us-west-2:0123456789:certificate/abcd-0123-ab12-123c-abcd1234567890
+      qa:
+        arn: arn:aws:acm:us-west-2:0123456789:certificate/abcd-0123-ab12-123c-abcd1234567890
+      stage:
+        arn: arn:aws:acm:us-west-2:0123456789:certificate/abcd-0123-ab12-123c-abcd1234567890
+      prod:
+        arn: arn:aws:acm:us-west-2:0123456789:certificate/abcd-0123-ab12-123c-abcd1234567890
+
+Resources:
+                
+    RedisLoadBalancer:
+        Type: AWS::ElasticLoadBalancing::LoadBalancer
+        Properties:
+            ConnectionDrainingPolicy:
+                  Enabled: true
+                  Timeout: 60
+            ConnectionSettings:
+                  IdleTimeout: 60
+            CrossZone: true
+            Listeners:
+                - InstancePort: 80
+                  InstanceProtocol: HTTP
+                  LoadBalancerPort: 80
+                  Protocol: HTTP
+            HealthCheck:
+              Target:
+                Fn::Join:
+                - ''
+                - - 'HTTP:80'
+                  - "/index.html"
+              HealthyThreshold: '3'
+              UnhealthyThreshold: '5'
+              Interval: '30'
+              Timeout: '5'
+                  
+            LoadBalancerName: !Sub Proyecto-LB
+            Scheme: internet-facing
+            Subnets: 
+             - !ImportValue PublicSubnet-1
+             - !ImportValue PublicSubnet-2
+            Instances: 
+             - !ImportValue web1-ec2
+             - !ImportValue web2-ec2
+            SecurityGroups: 
+                - !ImportValue SG-PROYECTO
+            Tags: 
+                - Key: Name
+                  Value: !Sub Proyecto-LB
+
+                - Key: Environment
+                  Value: !Sub Proyecto-LB
+
+
+  
+Outputs:
+
+    RedisLoadBalancer:
+        Description: A reference to the Classic Redis Load Balancer
+        Value: !Ref RedisLoadBalancer
+
+    RedisLoadBalancerUrl:
+        Description: The URL of the Classic Redis Load Balancer
+        Value: !GetAtt RedisLoadBalancer.DNSName 
