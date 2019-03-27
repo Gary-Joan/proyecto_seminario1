@@ -1,19 +1,27 @@
-### VPC
-Amazon Virtual Private Cloud (Amazon VPC) le permite lanzar recursos de AWS en una red virtual que haya definido. Dicha red virtual es prÃ¡cticamente idÃ©ntica a las redes tradicionales que se utilizan en sus propios centros de datos, con los beneficios que supone utilizar la infraestructura escalable de AWS.
-
+### EC2
+Amazon Elastic Compute Cloud (Amazon EC2) es un servicio web que proporciona capacidad informática en la nube segura y de tamaño modificable. Está diseñado para simplificar el uso de la informática en la nube a escala web para los desarrolladores.
 
 La siguiente imagen muestra un diagrama de lo genera la plantila de VPC que se encuentra en 
 
-[VPC](https://github.com/Gary-Joan/proyecto_seminario1/blob/master/RED/plantilla-vpc.yaml)
+[EC2](https://github.com/Gary-Joan/proyecto_seminario1/blob/master/Aplicacion/EC2.yaml)
 
-![alt text](https://github.com/Gary-Joan/proyecto_seminario1/blob/master/imagenes/VPC.jpg)
+![alt text](https://github.com/Gary-Joan/proyecto_seminario1/blob/master/imagenes/EC2.jpg)
 
-## OUTPUT VPC Y SG
+## OUTPUT VPC
 Aqui se muestran las salidas que tiene esta plantilla
-+ VPCID: Se muestra el id de la vpc que se crea.
-+ AZ1NAME: Muestra el availability zone numero 1 de la infraestructura.
-+ AZ2NAME: Muestra el availability zone numero 2 de la infraestructura
-+ PUBLICSUBNET1: Muestra el id de la primera subnet publica en zone 1 antes creada.
-+ PRIVATESUBNET1: Muestra el id de la primara subnet privada en la zone 1 antes creada.
-+ PUBLICSUBNET2: Muestra el id de la segunda subnet publica en la segunda zona antes creada.
-+ PRIVATESUBNET2: Muestra el id de la segunda subnet pribada en la segunda zona antes creada.
++ EC2id1: Se muestra el id de la maquina virutal 1 que se crea.
++ EC2id2: Se muestra el id de la maquina virutal 2 que se crea.
+
+### LOAD BALANCER
+Elastic Load Balancing distribuye automáticamente el tráfico de aplicaciones entrantes a través de varios destinos, tales como instancias de Amazon EC2, contenedores, direcciones IP y funciones Lambda. 
+
+La siguiente imagen muestra un diagrama de lo genera la plantila de LOAD BALANCER ya ingresado en la infraestructura 
+
+[VPC](https://github.com/Gary-Joan/proyecto_seminario1/blob/master/APLICACION/LOAD-BALANCER.yml)
+
+![alt text](https://github.com/Gary-Joan/proyecto_seminario1/blob/master/imagenes/LOAD.jpg)
+
+## OUTPUT VPC
+Aqui se muestran las salidas que tiene esta plantilla
++ RedisLoadBalancer: Se muestra el id del load balancer que se creo.
++ RedisLoadBalancerUrl: Muestra el url del nuevo load balancer para verificar su usa de la distribucion de carga.
