@@ -8,3 +8,9 @@ El objetivo general del siguiente proyecto es que el estudiante aprenda como fun
 + Distribución de carga.
 + Monitoreo.
 
+Aqui esta el orden para subir los archivos en el cloudformation.
+
++ [VPC](https://github.com/Gary-Joan/proyecto_seminario1/blob/master/Infraestructura/plantilla-vpc.yml)
++ [SG](https://github.com/Gary-Joan/proyecto_seminario1/blob/master/Seguridad/security-group.yml)
++ [EC2](https://github.com/Gary-Joan/proyecto_seminario1/blob/master/Aplicacion/EC2.yml)
++ [LOAD BALANCER](https://github.com/Gary-Joan/proyecto_seminario1/blob/master/Aplicacion/LOAD-BALANCER.yml)
