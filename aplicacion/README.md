@@ -7,7 +7,7 @@ La siguiente imagen muestra un diagrama de lo genera la plantila de VPC que se e
 
 ![alt text](https://github.com/Gary-Joan/proyecto_seminario1/blob/master/imagenes/EC2.jpg)
 
-## OUTPUT VPC
+## OUTPUT EC2
 Aqui se muestran las salidas que tiene esta plantilla
 + EC2id1: Se muestra el id de la maquina virutal 1 que se crea.
 + EC2id2: Se muestra el id de la maquina virutal 2 que se crea.
@@ -17,11 +17,11 @@ Elastic Load Balancing distribuye automáticamente el tráfico de aplicaciones ent
 
 La siguiente imagen muestra un diagrama de lo genera la plantila de LOAD BALANCER ya ingresado en la infraestructura 
 
-[VPC](https://github.com/Gary-Joan/proyecto_seminario1/blob/master/APLICACION/LOAD-BALANCER.yml)
+[LOAD BALANCER](https://github.com/Gary-Joan/proyecto_seminario1/blob/master/APLICACION/LOAD-BALANCER.yml)
 
 ![alt text](https://github.com/Gary-Joan/proyecto_seminario1/blob/master/imagenes/LOAD.jpg)
 
-## OUTPUT VPC
+## OUTPUT LOAD BALANCER
 Aqui se muestran las salidas que tiene esta plantilla
 + RedisLoadBalancer: Se muestra el id del load balancer que se creo.
 + RedisLoadBalancerUrl: Muestra el url del nuevo load balancer para verificar su usa de la distribucion de carga.

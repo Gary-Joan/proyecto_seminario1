@@ -4,7 +4,7 @@ Amazon Virtual Private Cloud (Amazon VPC) le permite lanzar recursos de AWS en u
 
 El codigo de SECURITY GROUP se encuentra en 
 
-[VPC](https://github.com/Gary-Joan/proyecto_seminario1/blob/master/Seguridad/security-group.yml)
+[SECURITY GROUP](https://github.com/Gary-Joan/proyecto_seminario1/blob/master/Seguridad/security-group.yml)
 
 
 ## OUTPUT SG
