@@ -5,7 +5,10 @@ Parameters:
     Description: Please enter the IP range (CIDR notation) for this VPC
     Type: String
     Default: 192.168.0.0/16
-    
+  KeyNamessh:
+    Description: Name of an existing EC2 KeyPair to enable SSH access to the instance
+    Type: AWS::EC2::KeyPair::KeyName
+    ConstraintDescription: "must be the name of an existing EC2 KeyPair."
     
 
 
@@ -233,7 +236,7 @@ Resources:
     Properties:
       ImageId: !FindInMap [RegionMap, !Ref 'AWS::Region', 'AMI']
       InstanceType: t2.micro
-      KeyName: linux
+      KeyName: !Ref KeyNamessh
       NetworkInterfaces: 
         - AssociatePublicIpAddress: "false"
           DeviceIndex: "0"
@@ -280,7 +283,7 @@ Resources:
     Properties:
       ImageId: !FindInMap [RegionMap, !Ref 'AWS::Region', 'AMI']
       InstanceType: t2.micro
-      KeyName: linux
+      KeyName: !Ref KeyNamessh
       NetworkInterfaces: 
         - AssociatePublicIpAddress: "false"
           DeviceIndex: "0"

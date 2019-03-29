@@ -1,6 +1,13 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: Creates an Amazon Linux Web Server 
 
+Parameters:
+  KeyNamessh:
+    Description: Name of an existing EC2 KeyPair to enable SSH access to the instance
+    Type: AWS::EC2::KeyPair::KeyName
+    ConstraintDescription: "must be the name of an existing EC2 KeyPair."
+  
+
 Mappings:
   RegionMap:
     us-east-1:
@@ -38,7 +45,7 @@ Resources:
     Properties:
       ImageId: !FindInMap [RegionMap, !Ref 'AWS::Region', 'AMI']
       InstanceType: t2.micro
-      KeyName: linux
+      KeyName: !Ref KeyNamessh
       NetworkInterfaces: 
         - AssociatePublicIpAddress: "false"
           DeviceIndex: "0"
@@ -85,7 +92,7 @@ Resources:
     Properties:
       ImageId: !FindInMap [RegionMap, !Ref 'AWS::Region', 'AMI']
       InstanceType: t2.micro
-      KeyName: linux
+      KeyName: !Ref KeyNamessh
       NetworkInterfaces: 
         - AssociatePublicIpAddress: "false"
           DeviceIndex: "0"
